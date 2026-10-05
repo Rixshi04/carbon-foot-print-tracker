@@ -1,104 +1,58 @@
-## Overview
+# Carbon Footprint Tracker
 
-Addressing the urgent need to mitigate climate change, this project introduces a dynamic carbon footprint tracker. By leveraging advanced methodologies, it enables individuals and organizations to quantify, analyze, and reduce their greenhouse gas emissions effectively. This tool empowers users to make informed decisions, integrates seamlessly with modern technologies, and facilitates collaboration between stakeholders to drive collective action. With robust visualization capabilities and real-time monitoring, it ensures transparency and accountability, fostering a culture of sustainability and environmental stewardship. By leveraging advanced methodologies, it enables individuals and organizations to quantify, analyze, and reduce their greenhouse gas emissions effectively.
+A lightweight Next.js MVP for estimating monthly personal carbon emissions from electricity, fuel, transport, flights, and waste.
 
----
+## Features
+- Monthly activity input form
+- CO₂e estimate in kilograms and tonnes
+- Energy / transport / waste breakdown
+- Simple visual contribution bars
+- Rule-based reduction recommendations
+- Client-side validation
+- Responsive UI
 
-## Features Overview
+## Tech stack
+- Next.js 14
+- React 18
+- TypeScript
+- CSS
 
-### Data Collection
+## Run locally
+```bash
+npm install
+npm run dev
+```
 
-Comprehensive data acquisition from diverse sources, including:
+Open http://localhost:3000.
 
-- Energy consumption.
-- Transportation and mobility patterns.
-- Waste generation metrics.
-- Organizational or lifestyle-specific activities.
+## Calculation
 
-### Calculation
+The prototype uses illustrative emission factors:
 
-Integrates verified algorithms and global emission factors to ensure precise carbon footprint calculations.
+| Activity | Factor |
+|---|---:|
+| Electricity | 0.70 kg CO₂e / kWh |
+| Fuel | 2.31 kg CO₂e / litre |
+| Car | 0.17 kg CO₂e / km |
+| Public transport | 0.08 kg CO₂e / km |
+| Flight | 0.25 kg CO₂e / km |
+| Waste | 0.50 kg CO₂e / kg |
 
-### Insights and Recommendations
+Total = energy + transport + waste.
 
-Utilizes predictive analytics and comparative trends to deliver actionable insights, offering:
+These are prototype defaults, not official reporting factors. Replace them with documented, region-specific factors before formal carbon accounting.
 
-- Tailored reduction strategies.
-- Benchmarked performance metrics.
+## Scope
 
-### Progress Tracking
+This repository previously contained project documentation and diagrams but no runnable application source. The current implementation turns the core calculation concept into a working MVP.
 
-Interactive dashboards and automated reporting to monitor ongoing efforts and outcomes over time.
+It does not claim to implement the previously described AI recommendations, IoT integration, predictive analytics, gamification, or live utility integrations.
 
----
-
-## Unique Value Proposition
-
-- **Predictive Analytics:** AI-driven identification of high-emission areas with targeted solutions.
-- **Behavioral Personalization:** Adaptive feedback and strategies aligned to user-specific behaviors.
-- **Engagement Incentives:** Gamified elements like progress milestones and peer challenges.
-- **Real-Time Integration:** Seamless syncing with IoT ecosystems and business intelligence tools.
-
----
-
-## Strategic Alignment
-
-### Sustainable Development Goals (SDGs)
-
-- **Goal 13: Climate Action**: Empowering proactive climate mitigation.
-- **Goal 7: Affordable and Clean Energy**: Advancing renewable energy adoption.
-- **Goal 12: Responsible Consumption and Production**: Encouraging resource efficiency and waste minimization.
-- **Goal 11: Sustainable Cities and Communities**: Promoting eco-conscious urban development.
-
----
-
-## References and Methodologies
-
-- **Emission Standards**: [IPCC Guidelines](https://www.ipcc-nggip.iges.or.jp/) | [EPA Frameworks](https://www.epa.gov/).
-- **Datasets Utilized**: [Global Carbon Atlas](http://www.globalcarbonatlas.org/) | [IEA Data](https://www.iea.org/).
-- **Framework Integration**: Builds on established environmental accounting protocols.
-
----
-
-## Deployment Instructions
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/<your-username>/carbon-footprint-tracker.git
-   ```
-2. Install dependencies:
-   ```bash
-   cd carbon-footprint-tracker
-   npm install
-   ```
-3. Launch the application:
-   ```bash
-   npm start
-   ```
-4. Navigate to the interface at `http://localhost:3000`.
-
----
-
-## Contributing and Support
-
-We welcome collaborative enhancements. Review the [CONTRIBUTING.md](CONTRIBUTING.md) guidelines for submission protocols. For queries, contact us at [support@example.com](mailto\:support@example.com).
-
----
-
-## License
-
-Distributed under the MIT License. Refer to [LICENSE](LICENSE) for full terms.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Future improvements
+- Region-specific emission-factor configuration
+- Persistent monthly history
+- CSV/PDF export
+- User accounts
+- Historical trend charts
+- More detailed transport and flight methodology
+- Documented factor sources
