@@ -56,3 +56,27 @@ It does not claim to implement the previously described AI recommendations, IoT 
 - Historical trend charts
 - More detailed transport and flight methodology
 - Documented factor sources
+
+## Automated tests
+
+The project includes Jest tests for:
+
+- Carbon calculations and input validation
+- Recommendation rules
+- CSV contents, values, timestamps, and CSV escaping
+- PDF generation and non-empty PDF output
+
+Install dependencies and run:
+
+```bash
+npm install
+npm test
+```
+
+For watch mode:
+
+```bash
+npm run test:watch
+```
+
+The export logic lives in `lib/exports.ts` so the CSV/PDF generation can be tested independently from the browser UI.
