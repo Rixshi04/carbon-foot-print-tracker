@@ -1,22 +1,21 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import jsPDF from "jspdf";
 import {
   calculateCarbon,
   getRecommendations,
   CarbonInput,
   CarbonResult
 } from "../lib/carbon";
+import {
+  buildCsv,
+  createPdf,
+  downloadCsv,
+  downloadPdf,
+  EXPORT_FIELDS
+} from "../lib/exports";
 
-const fields: { key: keyof CarbonInput; label: string; unit: string }[] = [
-  { key: "electricityKwh", label: "Electricity", unit: "kWh / month" },
-  { key: "fuelLiters", label: "Fuel", unit: "litres / month" },
-  { key: "carKm", label: "Car travel", unit: "km / month" },
-  { key: "publicTransportKm", label: "Public transport", unit: "km / month" },
-  { key: "flightKm", label: "Flights", unit: "km / month" },
-  { key: "wasteKg", label: "Waste", unit: "kg / month" }
-];
+const fields = EXPORT_FIELDS;
 
 const initialInput: CarbonInput = {
   electricityKwh: 0,
@@ -26,100 +25,6 @@ const initialInput: CarbonInput = {
   flightKm: 0,
   wasteKg: 0
 };
-
-function csvCell(value: string | number) {
-  return `"${String(value).replace(/"/g, '""')}"`;
-}
-
-function downloadCsv(input: CarbonInput, result: CarbonResult, recommendations: string[]) {
-  const rows = [
-    ["Carbon Footprint Summary"],
-    ["Generated", new Date().toISOString()],
-    [],
-    ["Input", "Value", "Unit"],
-    ["Electricity", input.electricityKwh, "kWh / month"],
-    ["Fuel", input.fuelLiters, "litres / month"],
-    ["Car travel", input.carKm, "km / month"],
-    ["Public transport", input.publicTransportKm, "km / month"],
-    ["Flights", input.flightKm, "km / month"],
-    ["Waste", input.wasteKg, "kg / month"],
-    [],
-    ["Emissions", "kg CO2e"],
-    ["Energy", result.breakdown.energy],
-    ["Transport", result.breakdown.transport],
-    ["Waste", result.breakdown.waste],
-    ["Total", result.totalKgCO2e],
-    ["Total tonnes", result.totalTonsCO2e],
-    [],
-    ["Recommendations"],
-    ...recommendations.map((item) => [item])
-  ];
-
-  const csv = rows.map((row) => row.map((value) => csvCell(value ?? "")).join(",")).join("\n");
-  const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = `carbon-footprint-${new Date().toISOString().slice(0, 10)}.csv`;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
-function downloadPdf(input: CarbonInput, result: CarbonResult, recommendations: string[]) {
-  const pdf = new jsPDF();
-  let y = 20;
-
-  pdf.setFontSize(20);
-  pdf.text("Carbon Footprint Summary", 20, y);
-  y += 10;
-
-  pdf.setFontSize(10);
-  pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, y);
-  y += 14;
-
-  pdf.setFontSize(16);
-  pdf.text(`Total: ${result.totalKgCO2e} kg CO2e / month`, 20, y);
-  y += 7;
-  pdf.setFontSize(11);
-  pdf.text(`Equivalent: ${result.totalTonsCO2e} tonnes CO2e`, 20, y);
-  y += 14;
-
-  pdf.setFontSize(14);
-  pdf.text("Activity inputs", 20, y);
-  y += 8;
-  pdf.setFontSize(10);
-  fields.forEach((field) => {
-    pdf.text(`${field.label}: ${input[field.key]} ${field.unit}`, 24, y);
-    y += 6;
-  });
-
-  y += 6;
-  pdf.setFontSize(14);
-  pdf.text("Emissions breakdown", 20, y);
-  y += 8;
-  pdf.setFontSize(10);
-  Object.entries(result.breakdown).forEach(([category, value]) => {
-    pdf.text(`${category}: ${value} kg CO2e`, 24, y);
-    y += 6;
-  });
-
-  y += 6;
-  pdf.setFontSize(14);
-  pdf.text("Recommendations", 20, y);
-  y += 8;
-  pdf.setFontSize(10);
-  recommendations.forEach((item) => {
-    const lines = pdf.splitTextToSize(`• ${item}`, 165);
-    pdf.text(lines, 24, y);
-    y += lines.length * 5 + 2;
-  });
-
-  y += 8;
-  pdf.setFontSize(8);
-  pdf.text("Prototype estimate. Emission factors are illustrative defaults and are not official reporting factors.", 20, y);
-
-  pdf.save(`carbon-footprint-${new Date().toISOString().slice(0, 10)}.pdf`);
-}
 
 export default function Home() {
   const [input, setInput] = useState<CarbonInput>(initialInput);
@@ -182,8 +87,8 @@ export default function Home() {
                 <ul>{recommendations.map((item) => <li key={item}>{item}</li>)}</ul>
               </div>
               <div className="export-actions">
-                <button type="button" onClick={() => downloadCsv(input, result, recommendations)}>Download CSV</button>
-                <button type="button" onClick={() => downloadPdf(input, result, recommendations)}>Download PDF</button>
+                <button type="button" onClick={() => downloadCsv(buildCsv(input, result, recommendations), `carbon-footprint-${new Date().toISOString().slice(0, 10)}.csv`)}>Download CSV</button>
+                <button type="button" onClick={() => downloadPdf(createPdf(input, result, recommendations), `carbon-footprint-${new Date().toISOString().slice(0, 10)}.pdf`)}>Download PDF</button>
               </div>
             </>
           ) : <div className="empty">Enter your activity and calculate your footprint to see the breakdown.</div>}
