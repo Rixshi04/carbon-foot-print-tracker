@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 html { background: #07110d; }
 body { margin: 0; color: #eef8f1; background: radial-gradient(circle at top right, #173c2b 0, #07110d 45%); font-family: Arial, Helvetica, sans-serif; min-height: 100vh; }
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 .shell { max-width: 1120px; margin: 0 auto; padding: 64px 24px; }
 .hero { max-width: 760px; margin-bottom: 40px; }
 .eyebrow { letter-spacing: .16em; font-size: 12px; opacity: .65; }
@@ -16,7 +16,10 @@ h1 { font-size: clamp(42px, 7vw, 78px); line-height: .98; margin: 14px 0 20px; }
 .field span { font-weight: 600; }
 .field small { grid-column: 1; }
 .field input { grid-column: 2; grid-row: 1 / span 2; width: 120px; background: #0a1811; border: 1px solid #294335; border-radius: 10px; color: white; padding: 10px 12px; }
+.field select { grid-column: 1 / -1; width: 100%; background: #0a1811; border: 1px solid #294335; border-radius: 10px; color: white; padding: 10px 12px; }
+.field-help { color: #8fa99a; font-size: 12px; line-height: 1.5; margin: -8px 0 18px; }
 button { width: 100%; margin-top: 12px; border: 0; border-radius: 12px; padding: 14px; cursor: pointer; background: #c9f36b; color: #08110b; font-weight: 800; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #c9f36b; outline-offset: 2px; }
 .total { font-size: clamp(52px, 8vw, 88px); font-weight: 800; letter-spacing: -.05em; }
 .total span { font-size: 18px; letter-spacing: 0; color: #9eb4a5; }
 .tons { color: #9eb4a5; }

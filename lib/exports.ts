@@ -3,8 +3,8 @@ import { CarbonInput, CarbonResult } from "./carbon";
 
 export const EXPORT_FIELDS: { key: keyof CarbonInput; label: string; unit: string }[] = [
   { key: "electricityKwh", label: "Electricity", unit: "kWh / month" },
-  { key: "fuelLiters", label: "Fuel", unit: "litres / month" },
-  { key: "carKm", label: "Car travel", unit: "km / month" },
+  { key: "fuelLiters", label: "Vehicle fuel", unit: "litres / month (fuel method)" },
+  { key: "carKm", label: "Car travel", unit: "km / month (distance method)" },
   { key: "publicTransportKm", label: "Public transport", unit: "km / month" },
   { key: "flightKm", label: "Flights", unit: "km / month" },
   { key: "wasteKg", label: "Waste", unit: "kg / month" }
@@ -44,7 +44,14 @@ export function createPdf(input: CarbonInput, result: CarbonResult, recommendati
 export function downloadCsv(csv: string, filename: string): void {
   const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  // Defer revocation until the browser has started the download.
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function downloadPdf(pdf: jsPDF, filename: string): void { pdf.save(filename); }
+export function downloadPdf(pdf: jsPDF, filename: string): void {
+  pdf.save(filename);
+}

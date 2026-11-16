@@ -15,6 +15,8 @@ import {
   EXPORT_FIELDS
 } from "../lib/exports";
 
+type VehicleMethod = "distance" | "fuel";
+
 const fields = EXPORT_FIELDS;
 
 const initialInput: CarbonInput = {
@@ -28,11 +30,20 @@ const initialInput: CarbonInput = {
 
 export default function Home() {
   const [input, setInput] = useState<CarbonInput>(initialInput);
+  const [vehicleMethod, setVehicleMethod] = useState<VehicleMethod>("distance");
   const [result, setResult] = useState<CarbonResult | null>(null);
   const [error, setError] = useState("");
 
   function updateField(key: keyof CarbonInput, value: string) {
-    setInput((current) => ({ ...current, [key]: Number(value) || 0 }));
+    setInput((current) => ({ ...current, [key]: value === "" ? 0 : Number(value) }));
+  }
+
+  function changeVehicleMethod(method: VehicleMethod) {
+    setVehicleMethod(method);
+    // Clear the previous method so one journey cannot be counted twice.
+    setInput((current) => ({ ...current, carKm: 0, fuelLiters: 0 }));
+    setResult(null);
+    setError("");
   }
 
   function submit(event: FormEvent) {
@@ -47,6 +58,11 @@ export default function Home() {
   }
 
   const recommendations = result ? getRecommendations(result) : [];
+  const visibleFields = fields.filter((field) => {
+    if (field.key === "carKm") return vehicleMethod === "distance";
+    if (field.key === "fuelLiters") return vehicleMethod === "fuel";
+    return true;
+  });
 
   return (
     <main className="shell">
@@ -59,7 +75,18 @@ export default function Home() {
       <div className="grid">
         <form className="card form-card" onSubmit={submit}>
           <div className="card-heading"><h2>Monthly activity</h2><span>All fields are optional</span></div>
-          {fields.map((field) => (
+          <label className="field">
+            <span>Vehicle calculation method</span>
+            <small>Choose one method for car emissions</small>
+            <select value={vehicleMethod} onChange={(event) => changeVehicleMethod(event.target.value as VehicleMethod)}>
+              <option value="distance">Distance travelled (km)</option>
+              <option value="fuel">Fuel consumed (litres)</option>
+            </select>
+          </label>
+          <p className="field-help">
+            Use either distance or fuel for the same vehicle activity, not both. Public transport and flights are calculated separately.
+          </p>
+          {visibleFields.map((field) => (
             <label className="field" key={field.key}>
               <span>{field.label}</span>
               <small>{field.unit}</small>
@@ -67,10 +94,10 @@ export default function Home() {
             </label>
           ))}
           <button type="submit">Calculate footprint</button>
-          {error && <p className="error">{error}</p>}
+          {error && <p className="error" role="alert">{error}</p>}
         </form>
 
-        <section className="card result-card">
+        <section className="card result-card" aria-live="polite">
           <div className="card-heading"><h2>Your estimate</h2><span>kg CO₂e / month</span></div>
           {result ? (
             <>
