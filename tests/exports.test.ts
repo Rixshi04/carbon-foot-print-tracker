@@ -2,14 +2,14 @@ import { buildCsv, createPdf, EXPORT_FIELDS } from "../lib/exports";
 import { CarbonInput, CarbonResult } from "../lib/carbon";
 
 const input: CarbonInput = {
-  electricityKwh: 100, fuelLiters: 10, carKm: 50,
+  electricityKwh: 100, fuelLiters: 10, carKm: 0,
   publicTransportKm: 20, flightKm: 0, wasteKg: 5
 };
 
 const result: CarbonResult = {
-  totalKgCO2e: 105.25,
-  totalTonsCO2e: 0.105,
-  breakdown: { energy: 93.1, transport: 9.15, waste: 2.5 }
+  totalKgCO2e: 255.25,
+  totalTonsCO2e: 0.255,
+  breakdown: { energy: 70, transport: 182.75, waste: 2.5 }
 };
 
 describe("CSV export", () => {
@@ -17,8 +17,10 @@ describe("CSV export", () => {
     const csv = buildCsv(input, result, ["Reduce electricity use."], new Date("2026-01-02T03:04:05.000Z"));
     expect(csv).toContain('"Carbon Footprint Summary"');
     expect(csv).toContain('"Electricity","100","kWh / month"');
-    expect(csv).toContain('"Energy","93.1"');
-    expect(csv).toContain('"Total","105.25"');
+    expect(csv).toContain('"Vehicle fuel","10","litres / month (fuel method)"');
+    expect(csv).toContain('"Energy","70"');
+    expect(csv).toContain('"Transport","182.75"');
+    expect(csv).toContain('"Total","255.25"');
     expect(csv).toContain('"Reduce electricity use."');
     expect(csv).toContain('"2026-01-02T03:04:05.000Z"');
   });
