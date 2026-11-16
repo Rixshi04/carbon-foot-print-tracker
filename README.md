@@ -121,3 +121,26 @@ npm test
 ```
 
 The current automated tests cover calculation arithmetic, custom emission factors, vehicle-mode exclusivity, input validation, overflow handling, recommendation rules, and CSV/PDF export generation. API/database integration tests and a full production build should also be run after installing dependencies and initializing the local database.
+
+## Browser UI tests
+
+Playwright runs end-to-end tests against a production Next.js server in Chromium at desktop and mobile viewport sizes.
+
+Run after installing dependencies, generating Prisma Client, applying migrations, seeding the factors, and building the app:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+The browser suite checks:
+- Initial page and database-backed emission factor loading
+- Vehicle distance/fuel mode switching
+- Calculation results and category breakdown
+- Saving a calculation and reloading persisted monthly history
+- CSV and PDF download events and filenames
+- User-visible save failure handling
+- Mobile viewport overflow
+- Native rejection of negative activity input
+
+In GitHub Actions, Chromium is installed automatically and Playwright HTML reports, traces, screenshots, and videos are retained as artifacts when available.
