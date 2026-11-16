@@ -13,10 +13,10 @@ async function openTracker(page: import("@playwright/test").Page) {
 
 async function enterTestActivity(page: import("@playwright/test").Page) {
   await page.getByLabel(/Reporting month/).fill(reportingMonth);
-  await page.getByLabel("Electricity kWh / month").fill("100");
-  await page.getByLabel("Car travel km / month (distance method)").fill("20");
-  await page.getByLabel("Public transport km / month").fill("50");
-  await page.getByLabel("Waste kg / month").fill("10");
+  await page.getByLabel("Electricity").fill("100");
+  await page.getByLabel("Car travel").fill("20");
+  await page.getByLabel("Public transport").fill("50");
+  await page.getByLabel("Waste").fill("10");
 }
 
 test("loads the calculator and database-backed emission factor version", async ({ page }) => {
@@ -28,16 +28,16 @@ test("loads the calculator and database-backed emission factor version", async (
 test("switches vehicle methods without exposing both car inputs", async ({ page }) => {
   await openTracker(page);
 
-  await expect(page.getByLabel("Car travel km / month (distance method)")).toBeVisible();
-  await expect(page.getByLabel("Vehicle fuel litres / month (fuel method)")).toHaveCount(0);
+  await expect(page.getByLabel("Car travel")).toBeVisible();
+  await expect(page.getByLabel("Vehicle fuel")).toHaveCount(0);
 
   await page.getByLabel(/Vehicle calculation method/).selectOption("fuel");
 
-  await expect(page.getByLabel("Vehicle fuel litres / month (fuel method)")).toBeVisible();
-  await expect(page.getByLabel("Car travel km / month (distance method)")).toHaveCount(0);
+  await expect(page.getByLabel("Vehicle fuel")).toBeVisible();
+  await expect(page.getByLabel("Car travel")).toHaveCount(0);
 
   await page.getByLabel(/Vehicle calculation method/).selectOption("distance");
-  await expect(page.getByLabel("Car travel km / month (distance method)")).toBeVisible();
+  await expect(page.getByLabel("Car travel")).toBeVisible();
 });
 
 test("calculates a footprint and displays the category breakdown", async ({ page }) => {
@@ -122,7 +122,7 @@ test("keeps the mobile layout within the viewport", async ({ page, isMobile }) =
 
 test("prevents negative activity values through native form validation", async ({ page }) => {
   await openTracker(page);
-  const electricity = page.getByLabel("Electricity kWh / month");
+  const electricity = page.getByLabel("Electricity");
   await electricity.fill("-10");
 
   const isValid = await electricity.evaluate((element: HTMLInputElement) => element.checkValidity());
