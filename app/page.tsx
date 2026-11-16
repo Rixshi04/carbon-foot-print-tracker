@@ -175,7 +175,7 @@ export default function Home() {
           <label className="field">
             <span>Reporting month</span>
             <small>Month this activity belongs to</small>
-            <input type="month" value={period} onChange={(event) => { setPeriod(event.target.value); setSavedMessage(""); }} required />
+            <input type="month" value={period} onChange={(event) => { setPeriod(event.target.value); setResult(null); setSavedMessage(""); setError(""); }} required />
           </label>
           <label className="field">
             <span>Vehicle calculation method</span>
