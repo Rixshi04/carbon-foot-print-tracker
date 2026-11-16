@@ -7,9 +7,9 @@ const input: CarbonInput = {
 };
 
 const result: CarbonResult = {
-  totalKgCO2e: 255.25,
-  totalTonsCO2e: 0.255,
-  breakdown: { energy: 70, transport: 182.75, waste: 2.5 }
+  totalKgCO2e: 97.2,
+  totalTonsCO2e: 0.097,
+  breakdown: { energy: 70, transport: 24.7, waste: 2.5 }
 };
 
 describe("CSV export", () => {
@@ -19,8 +19,8 @@ describe("CSV export", () => {
     expect(csv).toContain('"Electricity","100","kWh / month"');
     expect(csv).toContain('"Vehicle fuel","10","litres / month (fuel method)"');
     expect(csv).toContain('"Energy","70"');
-    expect(csv).toContain('"Transport","182.75"');
-    expect(csv).toContain('"Total","255.25"');
+    expect(csv).toContain('"Transport","24.7"');
+    expect(csv).toContain('"Total","97.2"');
     expect(csv).toContain('"Reduce electricity use."');
     expect(csv).toContain('"2026-01-02T03:04:05.000Z"');
   });
