@@ -46,13 +46,17 @@ const initialInput: CarbonInput = {
 export default function Home() {
   const [input, setInput] = useState<CarbonInput>(initialInput);
   const [vehicleMethod, setVehicleMethod] = useState<VehicleMethod>("distance");
-  const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const [period, setPeriod] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
   const [factors, setFactors] = useState<CarbonEmissionFactors>(EMISSION_FACTORS);
   const [factorVersion, setFactorVersion] = useState("illustrative-v1");
   const [result, setResult] = useState<CarbonResult | null>(null);
   const [history, setHistory] = useState<SavedCalculation[]>([]);
   const [error, setError] = useState("");
-  const [databaseError, setDatabaseError] = useState("");
+  const [factorError, setFactorError] = useState("");
+  const [historyError, setHistoryError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -70,7 +74,7 @@ export default function Home() {
         setFactorVersion(data.version);
       })
       .catch((err) => {
-        if (active) setDatabaseError(err instanceof Error ? err.message : "Database factors are unavailable.");
+        if (active) setFactorError(err instanceof Error ? err.message : "Database factors are unavailable.");
       });
     return () => { active = false; };
   }, []);
@@ -86,11 +90,11 @@ export default function Home() {
       .then((data) => {
         if (active) {
           setHistory(data.calculations);
-          setDatabaseError("");
+          setHistoryError("");
         }
       })
       .catch((err) => {
-        if (active) setDatabaseError(err instanceof Error ? err.message : "Database is unavailable.");
+        if (active) setHistoryError(err instanceof Error ? err.message : "Database is unavailable.");
       });
     return () => { active = false; };
   }, [period]);
@@ -229,8 +233,9 @@ export default function Home() {
 
       <section className="card history-card">
         <div className="card-heading"><h2>Saved calculations</h2><span>{period}</span></div>
-        {databaseError && <p className="error" role="alert">{databaseError} Set up the local database using the README instructions.</p>}
-        {!databaseError && history.length === 0 && <p className="empty">No saved calculations for this month yet. Calculate your footprint and select Save calculation.</p>}
+        {factorError && <p className="error" role="alert">{factorError} Run the database setup and seed commands in the README.</p>}
+        {historyError && <p className="error" role="alert">{historyError}</p>}
+        {!historyError && history.length === 0 && <p className="empty">No saved calculations for this month yet. Calculate your footprint and select Save calculation.</p>}
         {history.length > 0 && (
           <div className="history-list">
             {history.map((item) => (
