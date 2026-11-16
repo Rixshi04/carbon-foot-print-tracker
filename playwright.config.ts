@@ -20,7 +20,7 @@ export default defineConfig({
     },
     {
       name: "chromium-mobile",
-      use: { ...devices["iPhone 13"], defaultBrowserType: "chromium" }
+      use: { ...devices["iPhone 13"], browserName: "chromium" }
     }
   ],
   webServer: {
