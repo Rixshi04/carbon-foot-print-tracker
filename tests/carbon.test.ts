@@ -59,7 +59,7 @@ describe("calculateCarbon", () => {
 
   test("rejects values that overflow during emission calculation", () => {
     expect(() => calculateCarbon({
-      ...zeroInput, electricityKwh: Number.MAX_VALUE
+      ...zeroInput, fuelLiters: Number.MAX_VALUE
     })).toThrow("calculated emissions are too large");
   });
 
