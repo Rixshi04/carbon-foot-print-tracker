@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   calculateCarbon,
   getRecommendations,
@@ -56,6 +56,7 @@ export default function Home() {
   const [historyError, setHistoryError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const historyRequestId = useRef(0);
 
   useEffect(() => {
     const now = new Date();
@@ -84,6 +85,7 @@ export default function Home() {
   useEffect(() => {
     if (!period) return;
     let active = true;
+    const requestId = ++historyRequestId.current;
     fetch(`/api/calculations?period=${encodeURIComponent(period)}`)
       .then(async (response) => {
         const data = await response.json();
@@ -91,13 +93,15 @@ export default function Home() {
         return data as { calculations: SavedCalculation[] };
       })
       .then((data) => {
-        if (active) {
+        if (active && requestId === historyRequestId.current) {
           setHistory(data.calculations);
           setHistoryError("");
         }
       })
       .catch((err) => {
-        if (active) setHistoryError(err instanceof Error ? err.message : "Database is unavailable.");
+        if (active && requestId === historyRequestId.current) {
+          setHistoryError(err instanceof Error ? err.message : "Database is unavailable.");
+        }
       });
     return () => { active = false; };
   }, [period]);
@@ -142,6 +146,8 @@ export default function Home() {
       if (!response.ok) throw new Error(data.error || "Could not save this calculation.");
 
       const calculation = data.calculation as SavedCalculation;
+      // Invalidate any older history read that could otherwise overwrite this saved row.
+      historyRequestId.current += 1;
       setHistory((current) => [calculation, ...current.filter((item) => item.id !== calculation.id)]);
       setResult({
         totalKgCO2e: calculation.totalKgCO2e,
