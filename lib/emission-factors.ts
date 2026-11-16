@@ -30,5 +30,12 @@ export async function getEmissionFactorSet(): Promise<{
     keys.map((key) => [key, byKey.get(key)!.kgCO2ePerUnit])
   ) as CarbonEmissionFactors;
 
+  for (const key of keys) {
+    const value = factors[key];
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error(`Emission factor ${key} must be finite and non-negative.`);
+    }
+  }
+
   return { factors, version: [...versions][0] };
 }
