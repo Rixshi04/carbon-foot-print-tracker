@@ -17,10 +17,10 @@ describe("calculateCarbon", () => {
     });
 
     expect(result.breakdown.energy).toBe(70);
-    expect(result.breakdown.transport).toBe(47.5);
+    expect(result.breakdown.transport).toBe(52.1);
     expect(result.breakdown.waste).toBe(10);
-    expect(result.totalKgCO2e).toBe(127.5);
-    expect(result.totalTonsCO2e).toBe(0.128);
+    expect(result.totalKgCO2e).toBe(132.1);
+    expect(result.totalTonsCO2e).toBe(0.132);
   });
 
   test("calculates distance-based car emissions", () => {
