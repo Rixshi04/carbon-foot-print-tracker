@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 const reportingMonth = "2098-04";
 
@@ -126,4 +127,22 @@ test("prevents negative activity values through native form validation", async (
 
   const isValid = await electricity.evaluate((element: HTMLInputElement) => element.checkValidity());
   expect(isValid).toBe(false);
+});
+
+test("has no WCAG 2.1 A/AA accessibility violations on the calculator and results", async ({ page }) => {
+  await openTracker(page);
+
+  const initialAudit = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(initialAudit.violations).toEqual([]);
+
+  await enterTestActivity(page);
+  await page.getByRole("button", { name: "Calculate footprint" }).click();
+  await expect(page.locator(".total")).toContainText("82.4");
+
+  const resultsAudit = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(resultsAudit.violations).toEqual([]);
 });
