@@ -39,7 +39,7 @@ function validPeriod(value: unknown): value is string {
 
 export async function GET(request: NextRequest) {
   const period = request.nextUrl.searchParams.get("period");
-  if (period && !validPeriod(period)) {
+  if (period !== null && !validPeriod(period)) {
     return Response.json({ error: "Period must use YYYY-MM format." }, { status: 400 });
   }
 
