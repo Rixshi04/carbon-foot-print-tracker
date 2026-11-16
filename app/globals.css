@@ -16,9 +16,11 @@ h1 { font-size: clamp(42px, 7vw, 78px); line-height: .98; margin: 14px 0 20px; }
 .field span { font-weight: 600; }
 .field small { grid-column: 1; }
 .field input { grid-column: 2; grid-row: 1 / span 2; width: 120px; background: #0a1811; border: 1px solid #294335; border-radius: 10px; color: white; padding: 10px 12px; }
+.field input[type="month"] { width: 160px; }
 .field select { grid-column: 1 / -1; width: 100%; background: #0a1811; border: 1px solid #294335; border-radius: 10px; color: white; padding: 10px 12px; }
 .field-help { color: #8fa99a; font-size: 12px; line-height: 1.5; margin: -8px 0 18px; }
 button { width: 100%; margin-top: 12px; border: 0; border-radius: 12px; padding: 14px; cursor: pointer; background: #c9f36b; color: #08110b; font-weight: 800; }
+button:disabled { cursor: wait; opacity: .65; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #c9f36b; outline-offset: 2px; }
 .total { font-size: clamp(52px, 8vw, 88px); font-weight: 800; letter-spacing: -.05em; }
 .total span { font-size: 18px; letter-spacing: 0; color: #9eb4a5; }
@@ -31,9 +33,17 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .recommendations { border-top: 1px solid #294335; margin-top: 28px; padding-top: 20px; }
 .recommendations h3 { font-size: 15px; }
 .recommendations li { color: #b8c9bf; line-height: 1.55; margin: 8px 0; }
-.empty { color: #8fa99a; line-height: 1.7; padding: 48px 0; }
-.error { color: #ff9d9d; }
+.empty { color: #8fa99a; line-height: 1.7; padding: 24px 0; }
+.error { color: #ff9d9d; line-height: 1.5; }
+.success { color: #c9f36b; line-height: 1.5; }
 .export-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #294335; }
 .export-actions button { margin-top: 0; }
+.history-card { margin-top: 20px; }
+.history-list { display: grid; gap: 0; }
+.history-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid #294335; }
+.history-row div { display: grid; gap: 6px; }
+.history-row strong { font-size: 15px; }
+.history-row small { color: #8fa99a; font-size: 12px; }
+.history-row > span { color: #c9f36b; white-space: nowrap; }
 .disclaimer { color: #71877a; font-size: 12px; line-height: 1.6; margin-top: 22px; }
 @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .shell { padding: 40px 16px; } }
