@@ -32,11 +32,16 @@ export const EMISSION_FACTORS = {
   wasteKgCO2ePerKg: 0.5
 };
 
+export type CarbonEmissionFactors = typeof EMISSION_FACTORS;
+
 function roundKg(value: number): number {
   return Number(value.toFixed(2));
 }
 
-export function calculateCarbon(input: CarbonInput): CarbonResult {
+export function calculateCarbon(
+  input: CarbonInput,
+  factors: CarbonEmissionFactors = EMISSION_FACTORS
+): CarbonResult {
   for (const [key, value] of Object.entries(input)) {
     if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
       throw new Error(`${key} must be a finite, non-negative number.`);
@@ -49,13 +54,13 @@ export function calculateCarbon(input: CarbonInput): CarbonResult {
     throw new Error("Choose either vehicle fuel or car distance; do not enter both for the same reporting period.");
   }
 
-  const energyRaw = input.electricityKwh * EMISSION_FACTORS.electricityKgCO2ePerKwh;
+  const energyRaw = input.electricityKwh * factors.electricityKgCO2ePerKwh;
   const transportRaw =
-    input.fuelLiters * EMISSION_FACTORS.fuelKgCO2ePerLiter +
-    input.carKm * EMISSION_FACTORS.carKgCO2ePerKm +
-    input.publicTransportKm * EMISSION_FACTORS.publicTransportKgCO2ePerKm +
-    input.flightKm * EMISSION_FACTORS.flightKgCO2ePerKm;
-  const wasteRaw = input.wasteKg * EMISSION_FACTORS.wasteKgCO2ePerKg;
+    input.fuelLiters * factors.fuelKgCO2ePerLiter +
+    input.carKm * factors.carKgCO2ePerKm +
+    input.publicTransportKm * factors.publicTransportKgCO2ePerKm +
+    input.flightKm * factors.flightKgCO2ePerKm;
+  const wasteRaw = input.wasteKg * factors.wasteKgCO2ePerKg;
 
   if (![energyRaw, transportRaw, wasteRaw].every(Number.isFinite)) {
     throw new Error("The calculated emissions are too large to process. Check the activity values.");
