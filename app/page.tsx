@@ -97,7 +97,7 @@ export default function Home() {
         }
       })
       .catch((err) => {
-        if (active && requestId === historyRequestId.current) {
+        if (active) {
           setHistoryError(err instanceof Error ? err.message : "Database is unavailable.");
         }
       });
