@@ -1,4 +1,4 @@
-import { calculateCarbon, getRecommendations } from "../lib/carbon";
+import { calculateCarbon, getRecommendations, EMISSION_FACTORS } from "../lib/carbon";
 
 const zeroInput = {
   electricityKwh: 0, fuelLiters: 0, carKm: 0,
@@ -33,6 +33,15 @@ describe("calculateCarbon", () => {
     const result = calculateCarbon({ ...zeroInput, fuelLiters: 10 });
     expect(result.breakdown.transport).toBe(23.1);
     expect(result.breakdown.energy).toBe(0);
+  });
+
+  test("uses emission factors supplied by the database layer", () => {
+    const customFactors = {
+      ...EMISSION_FACTORS,
+      electricityKgCO2ePerKwh: 0.9
+    };
+    const result = calculateCarbon({ ...zeroInput, electricityKwh: 100 }, customFactors);
+    expect(result.breakdown.energy).toBe(90);
   });
 
   test("rejects simultaneous fuel and distance vehicle estimates", () => {
