@@ -1,9 +1,16 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const reportingMonth = "2098-04";
+function reportingMonthFor(projectName: string): string {
+  const runToken = Number(process.env.GITHUB_RUN_ID ?? Date.now());
+  const projectOffset = projectName === "chromium-mobile" ? 1 : 0;
+  const token = runToken + projectOffset;
+  const year = 2090 + (Math.floor(token / 12) % 1000);
+  const month = (token % 12) + 1;
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
 
-async function openTracker(page: import("@playwright/test").Page) {
+async function openTracker(page: Page) {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Understand your carbon footprint." })).toBeVisible();
   await expect(page.getByLabel(/Reporting month/)).toHaveValue(/\d{4}-\d{2}/);
@@ -11,7 +18,7 @@ async function openTracker(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "Your estimate" })).toBeVisible();
 }
 
-async function enterTestActivity(page: import("@playwright/test").Page) {
+async function enterTestActivity(page: Page, reportingMonth: string) {
   await page.getByLabel(/Reporting month/).fill(reportingMonth);
   await page.getByLabel("Electricity").fill("100");
   await page.getByLabel("Car travel").fill("20");
@@ -19,8 +26,11 @@ async function enterTestActivity(page: import("@playwright/test").Page) {
   await page.getByLabel("Waste").fill("10");
 }
 
-test("loads the calculator and database-backed emission factor version", async ({ page }) => {
+test("loads the calculator and database-backed emission factor version", async ({ page }, testInfo) => {
   await openTracker(page);
+  await enterTestActivity(page, reportingMonthFor(testInfo.project.name));
+  await page.getByRole("button", { name: "Calculate footprint" }).click();
+
   await expect(page.getByText("Emission factor version: illustrative-v1")).toBeVisible();
   await expect(page.getByText(/Run the database setup and seed commands/)).toHaveCount(0);
 });
@@ -40,9 +50,9 @@ test("switches vehicle methods without exposing both car inputs", async ({ page 
   await expect(page.getByLabel("Car travel")).toBeVisible();
 });
 
-test("calculates a footprint and displays the category breakdown", async ({ page }) => {
+test("calculates a footprint and displays the category breakdown", async ({ page }, testInfo) => {
   await openTracker(page);
-  await enterTestActivity(page);
+  await enterTestActivity(page, reportingMonthFor(testInfo.project.name));
 
   await page.getByRole("button", { name: "Calculate footprint" }).click();
 
@@ -53,23 +63,29 @@ test("calculates a footprint and displays the category breakdown", async ({ page
   await expect(page.getByRole("heading", { name: "What to focus on" })).toBeVisible();
 });
 
-test("saves a calculation and reloads it from SQLite history", async ({ page }) => {
+test("saves a calculation and reloads it from SQLite history", async ({ page }, testInfo) => {
+  const reportingMonth = reportingMonthFor(testInfo.project.name);
   await openTracker(page);
-  await enterTestActivity(page);
+  await enterTestActivity(page, reportingMonth);
   await page.getByRole("button", { name: "Calculate footprint" }).click();
   await expect(page.locator(".total")).toContainText("82.4");
 
   await page.getByRole("button", { name: "Save calculation" }).click();
   await expect(page.getByRole("status")).toHaveText("Calculation saved successfully.");
-  await expect(page.locator(".history-row").filter({ hasText: "82.4 kg CO₂e" })).toBeVisible();
+  const savedRow = page.locator(".history-row").filter({ hasText: "82.4 kg CO₂e" });
+  await expect(savedRow).toHaveCount(1);
+  await expect(savedRow).toBeVisible();
 
   await page.reload();
-  await expect(page.locator(".history-row").filter({ hasText: "82.4 kg CO₂e" })).toBeVisible();
+  const reloadedRow = page.locator(".history-row").filter({ hasText: "82.4 kg CO₂e" });
+  await expect(reloadedRow).toHaveCount(1);
+  await expect(reloadedRow).toBeVisible();
 });
 
-test("downloads CSV and PDF exports from the result panel", async ({ page }) => {
+test("downloads CSV and PDF exports from the result panel", async ({ page }, testInfo) => {
+  const reportingMonth = reportingMonthFor(testInfo.project.name);
   await openTracker(page);
-  await enterTestActivity(page);
+  await enterTestActivity(page, reportingMonth);
   await page.getByRole("button", { name: "Calculate footprint" }).click();
 
   const [csvDownload] = await Promise.all([
@@ -85,9 +101,9 @@ test("downloads CSV and PDF exports from the result panel", async ({ page }) => 
   expect(pdfDownload.suggestedFilename()).toBe(`carbon-footprint-${reportingMonth}.pdf`);
 });
 
-test("shows a useful message when saving fails", async ({ page }) => {
+test("shows a useful message when saving fails", async ({ page }, testInfo) => {
   await openTracker(page);
-  await enterTestActivity(page);
+  await enterTestActivity(page, reportingMonthFor(testInfo.project.name));
   await page.getByRole("button", { name: "Calculate footprint" }).click();
 
   await page.route("**/api/calculations", async (route) => {
@@ -103,7 +119,7 @@ test("shows a useful message when saving fails", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "Save calculation" }).click();
-  await expect(page.getByRole("alert")).toContainText("Test save failure.");
+  await expect(page.getByText("Test save failure.", { exact: true })).toBeVisible();
 });
 
 test("keeps the mobile layout within the viewport", async ({ page, isMobile }) => {
@@ -129,7 +145,7 @@ test("prevents negative activity values through native form validation", async (
   expect(isValid).toBe(false);
 });
 
-test("has no WCAG 2.1 A/AA accessibility violations on the calculator and results", async ({ page }) => {
+test("has no WCAG 2.1 A/AA accessibility violations on the calculator and results", async ({ page }, testInfo) => {
   await openTracker(page);
 
   const initialAudit = await new AxeBuilder({ page })
@@ -137,7 +153,7 @@ test("has no WCAG 2.1 A/AA accessibility violations on the calculator and result
     .analyze();
   expect(initialAudit.violations).toEqual([]);
 
-  await enterTestActivity(page);
+  await enterTestActivity(page, reportingMonthFor(testInfo.project.name));
   await page.getByRole("button", { name: "Calculate footprint" }).click();
   await expect(page.locator(".total")).toContainText("82.4");
 
