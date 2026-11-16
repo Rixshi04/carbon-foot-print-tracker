@@ -46,10 +46,7 @@ const initialInput: CarbonInput = {
 export default function Home() {
   const [input, setInput] = useState<CarbonInput>(initialInput);
   const [vehicleMethod, setVehicleMethod] = useState<VehicleMethod>("distance");
-  const [period, setPeriod] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  });
+  const [period, setPeriod] = useState("");
   const [factors, setFactors] = useState<CarbonEmissionFactors>(EMISSION_FACTORS);
   const [factorVersion, setFactorVersion] = useState("illustrative-v1");
   const [result, setResult] = useState<CarbonResult | null>(null);
@@ -59,6 +56,11 @@ export default function Home() {
   const [historyError, setHistoryError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const now = new Date();
+    setPeriod(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -80,6 +82,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!period) return;
     let active = true;
     fetch(`/api/calculations?period=${encodeURIComponent(period)}`)
       .then(async (response) => {
