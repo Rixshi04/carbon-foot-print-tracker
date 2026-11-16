@@ -1,0 +1,43 @@
+name: Carbon Footprint Tracker CI
+
+on:
+  push:
+    branches:
+      - main
+      - "phase-1/**"
+      - "phase-2/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:./dev.db"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed emission factors
+        run: npm run db:seed
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build Next.js application
+        run: npm run build
