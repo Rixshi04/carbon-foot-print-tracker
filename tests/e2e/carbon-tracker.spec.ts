@@ -47,7 +47,7 @@ test("calculates a footprint and displays the category breakdown", async ({ page
 
   await expect(page.locator(".total")).toContainText("82.4");
   await expect(page.getByText("70 kg", { exact: true })).toBeVisible();
-  await expect(page.getByText("8.4 kg", { exact: true })).toBeVisible();
+  await expect(page.getByText("7.4 kg", { exact: true })).toBeVisible();
   await expect(page.getByText("5 kg", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What to focus on" })).toBeVisible();
 });
