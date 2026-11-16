@@ -1,16 +1,16 @@
 # Carbon Footprint Tracker
 
-A lightweight Next.js MVP for estimating monthly personal carbon emissions from electricity, vehicle activity, public transport, flights, and waste.
+A Next.js MVP for estimating monthly personal carbon emissions, saving calculations to SQLite, and reviewing monthly history.
 
 ## Features
 - Monthly activity input form
 - CO₂e estimate in kilograms and tonnes
 - Energy / transport / waste breakdown
 - Distance-based or fuel-based car calculation mode
-- Mutually exclusive car calculation modes to prevent double counting
-- Simple visual contribution bars
-- Rule-based reduction recommendations
-- Client-side and calculation-level validation
+- Server-side validation and calculation before saving
+- SQLite persistence through Prisma ORM
+- Database-backed emission factors with version snapshots on saved calculations
+- Monthly saved-calculation history
 - CSV and PDF exports
 - Responsive UI
 
@@ -18,20 +18,77 @@ A lightweight Next.js MVP for estimating monthly personal carbon emissions from 
 - Next.js 14
 - React 18
 - TypeScript
-- CSS
+- Prisma ORM 6
+- SQLite
 - Jest
 
-## Run locally
+## Local setup
+
+Use Node.js compatible with the installed Next.js and Prisma versions.
+
+1. Install dependencies:
+
 ```bash
 npm install
+```
+
+2. Create your local environment file.
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+On macOS/Linux:
+
+```bash
+cp .env.example .env
+```
+
+3. Generate the Prisma client:
+
+```bash
+npm run db:generate
+```
+
+4. Apply the checked-in SQLite migration:
+
+```bash
+npm run db:migrate
+```
+
+5. Seed the illustrative emission factors:
+
+```bash
+npm run db:seed
+```
+
+6. Start the application:
+
+```bash
 npm run dev
 ```
 
 Open http://localhost:3000.
 
-## Calculation
+The configured SQLite URL is `file:./dev.db`, resolved relative to `prisma/schema.prisma`. The local database is therefore created at `prisma/dev.db` and is ignored by Git.
 
-The prototype uses illustrative emission factors:
+## Database design
+
+### CarbonCalculation
+
+Stores a saved calculation, reporting month, input values, category totals, overall totals, vehicle method, timestamps, and the factor version used. The actual factor values used are also snapshotted on each calculation so historical records remain auditable if defaults change later.
+
+### EmissionFactor
+
+Stores each calculation factor, its unit, region label, version, and source note. The API loads the six required `DEFAULT` region factors from SQLite; it does not silently substitute hard-coded values if the database has not been seeded.
+
+The current application is single-user/local and does not implement authentication or user ownership. Do not expose this database-backed deployment publicly with sensitive personal data until authentication and access controls are added.
+
+## Calculation methodology
+
+The seed script currently inserts illustrative prototype defaults:
 
 | Activity | Factor |
 |---|---:|
@@ -42,47 +99,25 @@ The prototype uses illustrative emission factors:
 | Flight | 0.25 kg CO₂e / km |
 | Waste | 0.50 kg CO₂e / kg |
 
-Household electricity is counted under energy. Vehicle fuel and car distance are counted under transport. For car activity, choose either the fuel-based method or the distance-based method for a reporting period; the calculation engine rejects positive values for both methods to avoid double counting. Public transport and flight activity remain separate transport inputs.
+Household electricity is counted under energy. Vehicle fuel and car distance are counted under transport. The UI and API enforce one car calculation method per saved reporting period entry to prevent the same activity being counted twice.
 
-The displayed total is calculated from the rounded category values so the displayed breakdown adds up to the displayed total.
+These are not official or region-specific factors. The seed source note explicitly marks them as illustrative. Replace them with verified, documented factors before using the application for formal carbon accounting.
 
-These are prototype defaults, not official reporting factors. They are not region-specific and should not be used for formal carbon accounting. Replace them with documented, region-specific factors and a clearly defined methodology before official reporting.
+## Database commands
 
-## Scope
+| Command | Purpose |
+|---|---|
+| `npm run db:generate` | Generate Prisma Client |
+| `npm run db:migrate` | Apply/create local development migrations |
+| `npm run db:seed` | Insert or update the illustrative emission factors |
+| `npm run db:studio` | Open Prisma Studio to inspect local database records |
 
-This is a prototype estimator. It does not claim to implement AI recommendations, IoT integration, predictive analytics, gamification, or live utility integrations. The current car-method safeguard assumes the monthly car activity is entered using one method only; it does not support mixing distance and fuel data for different cars in the same reporting period.
+## Tests
 
-## Future improvements
-- Region-specific emission-factor configuration and documented sources
-- Support for multiple vehicles with per-vehicle calculation methods
-- Persistent monthly history
-- User accounts
-- Historical trend charts
-- More detailed transport and flight methodology
-- Expanded UI integration and accessibility tests
-
-## Automated tests
-
-The project includes Jest tests for:
-
-- Carbon calculations and input validation
-- Alternative vehicle calculation methods and double-counting prevention
-- Calculation overflow and displayed-total consistency
-- Recommendation rules, including zero-emission input
-- CSV contents, values, timestamps, and CSV escaping
-- PDF generation and non-empty PDF output
-
-Install dependencies and run:
+Run the calculation and export unit tests:
 
 ```bash
-npm install
 npm test
 ```
 
-For watch mode:
-
-```bash
-npm run test:watch
-```
-
-The export logic lives in `lib/exports.ts` so CSV/PDF generation can be tested independently from the browser UI.
+The current automated tests cover calculation arithmetic, custom emission factors, vehicle-mode exclusivity, input validation, overflow handling, recommendation rules, and CSV/PDF export generation. API/database integration tests and a full production build should also be run after installing dependencies and initializing the local database.
