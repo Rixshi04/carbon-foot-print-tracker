@@ -25,6 +25,7 @@ coverage/
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
 
 # IDE / OS
 .vscode/
