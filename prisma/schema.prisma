@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model CarbonCalculation {
+  id                     String   @id @default(cuid())
+  period                 String
+  vehicleMethod          String
+  electricityKwh         Float    @default(0)
+  fuelLiters             Float    @default(0)
+  carKm                  Float    @default(0)
+  publicTransportKm      Float    @default(0)
+  flightKm               Float    @default(0)
+  wasteKg                Float    @default(0)
+  energyKg               Float
+  transportKg            Float
+  wasteEmissionsKg       Float
+  totalKgCO2e            Float
+  totalTonsCO2e          Float
+  factorVersion          String
+  electricityFactor      Float
+  fuelFactor             Float
+  carDistanceFactor      Float
+  publicTransportFactor  Float
+  flightFactor           Float
+  wasteFactor            Float
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([period])
+  @@index([createdAt])
+}
+
+model EmissionFactor {
+  key             String   @id
+  label           String
+  unit            String
+  kgCO2ePerUnit   Float
+  region          String   @default("DEFAULT")
+  version         String
+  source          String
+  updatedAt       DateTime @updatedAt
+
+  @@index([region])
+}
