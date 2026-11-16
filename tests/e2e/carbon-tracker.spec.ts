@@ -77,6 +77,7 @@ test("saves a calculation and reloads it from SQLite history", async ({ page }, 
   await expect(savedRow).toBeVisible();
 
   await page.reload();
+  await page.getByLabel(/Reporting month/).fill(reportingMonth);
   const reloadedRow = page.locator(".history-row").filter({ hasText: "82.4 kg CO₂e" });
   await expect(reloadedRow).toHaveCount(1);
   await expect(reloadedRow).toBeVisible();
