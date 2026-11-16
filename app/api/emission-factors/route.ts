@@ -1,6 +1,7 @@
 import { getEmissionFactorSet } from "../../../lib/emission-factors";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
