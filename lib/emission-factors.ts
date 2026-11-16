@@ -21,8 +21,8 @@ export async function getEmissionFactorSet(): Promise<{
     );
   }
 
-  const versions = new Set(keys.map((key) => byKey.get(key)!.version));
-  if (versions.size !== 1) {
+  const version = byKey.get(keys[0])!.version;
+  if (keys.some((key) => byKey.get(key)!.version !== version)) {
     throw new Error("The active emission factors have inconsistent versions.");
   }
 
@@ -37,5 +37,5 @@ export async function getEmissionFactorSet(): Promise<{
     }
   }
 
-  return { factors, version: [...versions][0] };
+  return { factors, version };
 }
